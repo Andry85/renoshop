@@ -3,7 +3,7 @@ import styles from '../styles/Index.module.css'
 import Link from 'next/link'
 import Image from 'next/image'
 import Layout from '../components/layout'
-import {dataList} from '../data/data';
+import { getSortedPostsData } from '../libs/posts'
 
 
 
@@ -19,31 +19,35 @@ import {dataList} from '../data/data';
 //   }
 // }
 
-export async function getServerSideProps(context) {
-  const res = await fetch(`https://jsonplaceholder.typicode.com/todos/`)
-  const data = await res.json()
+// export async function getServerSideProps(context) {
+//   const res = await fetch(`https://jsonplaceholder.typicode.com/todos/`)
+//   const data = await res.json()
 
-  if (!data) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    }
-  }
+//   if (!data) {
+//     return {
+//       redirect: {
+//         destination: '/',
+//         permanent: false,
+//       },
+//     }
+//   }
 
-  return {
-    props: {
-      data: data
-    }, // will be passed to the page component as props
-  }
-}
+//   return {
+//     props: {
+//       data: data
+//     }, // will be passed to the page component as props
+//   }
+// }
 
 
-export default function Index({data}) {
+export default function Index({allPostsData}) {
 
-  const listItems = data.map((item) =>
-    <li>{item.title}</li>
+  const listItems = allPostsData.map((item) =>
+    <li key={item.id}>
+      <Link href={item.id.toString()}>
+          <a>{item.title}</a>
+        </Link>
+      </li>
   );
 
   return (
@@ -67,3 +71,12 @@ export default function Index({data}) {
 }
 
 
+
+export async function getStaticProps() {
+  const allPostsData = getSortedPostsData()
+  return {
+    props: {
+      allPostsData
+    }
+  }
+}
