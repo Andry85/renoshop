@@ -3,52 +3,32 @@ import styles from '../styles/Index.module.css'
 import Link from 'next/link'
 import Image from 'next/image'
 import Layout from '../components/layout'
-import { getSortedPostsData } from '../libs/posts'
 
 
 
-// export async function getStaticProps() {
-//   // Get external data from the file system, API, DB, etc.
+export async function getServerSideProps(context) {
+  const res = await fetch(`https://jsonplaceholder.typicode.com/posts`)
+  const data = await res.json()
 
-//   // The value of the `props` key will be
-//   //  passed to the `Home` component
-//   return {
-//     props: {
-//       data: dataList
-//     }
-//   }
-// }
+  if (!data) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    }
+  }
 
-// export async function getServerSideProps(context) {
-//   const res = await fetch(`https://jsonplaceholder.typicode.com/todos/`)
-//   const data = await res.json()
-
-//   if (!data) {
-//     return {
-//       redirect: {
-//         destination: '/',
-//         permanent: false,
-//       },
-//     }
-//   }
-
-//   return {
-//     props: {
-//       data: data
-//     }, // will be passed to the page component as props
-//   }
-// }
+  return {
+    props: {
+      data: data
+    }, // will be passed to the page component as props
+  }
+}
 
 
-export default function Index({allPostsData}) {
+export default function Index({data}) {
 
-  const listItems = allPostsData.map((item) =>
-    <li key={item.id}>
-      <Link href={item.id.toString()}>
-          <a>{item.title}</a>
-        </Link>
-      </li>
-  );
 
   return (
     <Layout home>
@@ -58,25 +38,23 @@ export default function Index({allPostsData}) {
         </Head>
 
         <div className={styles.main}>
-        <ul>{listItems}</ul>
+        <ul>
+          {data.map(({ id, body, title }) => (
+            <li key={id}>
+              <Link href={`/posts/${id}`}>
+                <a>{title}</a>
+              </Link>
+              <br />
+              <small>
+                {body}
+              </small>
+            </li>
+          ))}
+        </ul>
          
-          <Link href="/shop-cart">
-          <a>ShopCart</a>
-        </Link>
 
         </div>
       </div>
     </Layout>
   )
-}
-
-
-
-export async function getStaticProps() {
-  const allPostsData = getSortedPostsData()
-  return {
-    props: {
-      allPostsData
-    }
-  }
 }
